@@ -613,7 +613,10 @@ When developing with Neo4j, please use JDK 7 or 8 and your favorite IDE.
 
 <ul class="sectlevel2">
 <li><a href="#_neo4j_for_java_developers">Neo4j for Java Developers</a></li>
+<li><a href="#neo4j-dotnet-driver"><span class="icon"><i class="fa fa-check-circle-o"></i></span> Neo4j Java Driver</a></li>
+<li><a href="#_using_neo4j_s_embedded_java_api">Using Neo4j&#8217;s Embedded Java API</a></li>
 <li><a href="#_the_example_project">The Example Project</a></li>
+<li><a href="#_neo4j_community_drivers">Neo4j Community Drivers</a></li>
 <li><a href="#neo4j-jdbc">Using Neo4j Server with JDBC</a></li>
 <li><a href="#neo4j-ogm">Object-Graph-Mapping with Neo4j-OGM</a></li>
 <li><a href="#server-extension">Extending Neo4j Server with a Server Extension</a></li>
@@ -639,18 +642,128 @@ When developing with Neo4j, please use JDK 7 or 8 and your favorite IDE.
 
 
 <div class="paragraph">
-<p>There are two ways of using Neo4j from the JVM.
-The standalone Neo4j Server can be installed on any machine and then accessed via its HTTP API.
-You can use any REST library you choose for any JVM language.
-The dedicated Neo4j drivers go beyond that by offering comprehensive APIs for integrating with graph-based applications.</p>
+<p>The standalone Neo4j Server can be installed on any machine and then accessed via its <strong>binary "Bolt" protocol</strong> through our official driver or any bolt-enabled drivers.</p>
 </div>
 
 
 
 <div class="paragraph">
+<p>The server&#8217;s HTTP API is used by many other integrations, drivers or with any REST library.</p>
+</div>
+
+
+
+<div class="paragraph">
+<p>You can also extend Neo4j by implementing <strong>stored procedures for Cypher</strong> in Java or other JVM languages, writing <strong>server extensions</strong> which act as REST-endpoints or by embedding Neo4j into your own Java applications.</p>
+</div>
+
+</div>
+<div  id="neo4j-dotnet-driver" class="sect2 columns medium-12" style='padding-left: 0;' >
+<h3><span class="icon"><i class="fa fa-check-circle-o"></i></span> Neo4j Java Driver</h3>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.13.4/mode/java/java.min.js"></script>
+
+
+<div class="paragraph">
+<p>The Neo4j Java driver is officially supported by Neo4j and connects to the database using the binary protocol.
+It aims to be minimal, while being idiomatic to Java.</p>
+</div>
+
+
+
+<div class="paragraph">
+<p>When using Maven, add this to your <em>pom.xml</em> file:</p>
+</div>
+
+<div class="listingblock">
+<div class="content code-panel" style="width: 100%; height: auto; border: medium 1px;">
+<pre style="font-size: 16px; font-weight: 100;"  class="code programlisting cm-s-neo" data-lang="xml"><code>&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.neo4j.driver&lt;/groupId&gt;
+        &lt;artifactId&gt;neo4j-java-driver&lt;/artifactId&gt;
+        &lt;version&gt;1.0.0-RC2&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;</code></pre>
+</div>
+</div>
+
+
+<div class="paragraph">
+<p>For Gradle or Grails, this is how to add the dependency:</p>
+</div>
+
+<div class="listingblock">
+<div class="content code-panel" style="width: 100%; height: auto; border: medium 1px;">
+<pre style="font-size: 16px; font-weight: 100;"  class="code programlisting cm-s-neo" data-lang="groovy"><code>compile 'org.neo4j.driver:neo4j-java-driver:1.0.0-RC2'</code></pre>
+</div>
+</div>
+
+
+<div class="paragraph">
+<p>For other build systems, see <a href="http://search.maven.org/#artifactdetails%7Corg.neo4j.driver%7Cneo4j-java-driver%7C1.0.0-RC2%7Cjar">information available at Maven Central</a>.</p>
+</div>
+
+<div class="listingblock">
+<div class="content code-panel" style="width: 100%; height: auto; border: medium 1px;">
+<pre style="font-size: 16px; font-weight: 100;"  class="code programlisting cm-s-neo" data-lang="java"><code>import org.neo4j.driver.v1.Driver;
+import org.neo4j.driver.v1.GraphDatabase;
+import org.neo4j.driver.v1.Record;
+import org.neo4j.driver.v1.StatementResult;
+import org.neo4j.driver.v1.Session;
+
+Driver driver = GraphDatabase.driver( "bolt://localhost" );
+Session session = driver.session();
+
+session.run( "CREATE (neo:Person {name:'Neo', age:23})" );
+
+StatementResult result = session.run( "MATCH (p:Person) WHERE p.name = 'Neo' RETURN p.age" );
+while ( result.hasNext() )
+{
+    Record record = result.next();
+    System.out.println( "Neo is " + record.get( "p.age" ).asInt() + " years old." );
+}
+
+session.close();
+driver.close();</code></pre>
+</div>
+</div>
+<table class="tableblock frame-all grid-all spread">
+<colgroup>
+<col style="width: 33.3333%;">
+<col style="width: 33.3333%;">
+<col style="width: 33.3334%;">
+</colgroup>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Name</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><span class="icon"><i class="fa fa-tag"></i></span> Version</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><span class="icon"><i class="fa fa-user"></i></span> Authors</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock">neo4j-java-driver</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">1.0.0-RC2</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">The Neo4j Team</p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="http://search.maven.org/#artifactdetails%7Corg.neo4j.driver%7Cneo4j-java-driver%7C1.0.0-RC2%7Cjar"><span class="icon"><i class="fa fa-gift"></i></span> Package</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="https://github.com/neo4j-examples/movies-java-bolt"><span class="icon"><i class="fa fa-play-circle"></i></span> Example</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="http://stackoverflow.com/questions/tagged/neo4j+java"><span class="icon"><i class="fa fa-stack-overflow "></i></span> StackOverflow</a></p></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="http://neo4j.com/docs/developer-manual/current#driver-manual-index"><span class="icon"><i class="fa fa-book"></i></span> Docs</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="http://alpha.neohq.net/docs/java-driver"><span class="icon"><i class="fa fa-code"></i></span> API</a></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><a href="http://github.com/neo4j/neo4j-java-driver"><span class="icon"><i class="fa fa-github"></i></span> Source</a></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div  id="_using_neo4j_s_embedded_java_api" class="sect2 columns medium-12" style='padding-left: 0;' >
+<h3>Using Neo4j&#8217;s Embedded Java API</h3>
+
+
+<div class="paragraph">
 <p>But you can also run <a href="http://neo4j.com/docs/developer-manual/current/tutorials-java-embedded.html">Neo4j embedded in your JVM process</a>, much like HSQL or Derby.
-This is great for unit testing, but also for high performance / no-network setups.
-If you use Neo4j embedded, you can use the Neo4j Core-Java-API directly.
+This is great for unit testing, but also for high performance / network-free setups.
+If you embed Neo4j, you can use the Neo4j Core-Java-API directly.
 Besides an object-oriented approach to the graph database, working with Nodes, Relationships, and Paths, it also offers highly customizable high-speed traversal- and graph-algorithm implementations.
 You can also choose from any useful drivers wrapping that API, which exist either for specific programming languages or that add interesting functionality.</p>
 </div>
@@ -692,6 +805,23 @@ Each backend implementation shows you how to connect to Neo4j from each of the d
 You will find the implementations for all drivers as <a href="https://github.com/neo4j-examples?query=movies">individual GitHub repositories</a>, which you can clone and deploy directly.</p>
 </div>
 
+</div>
+<div  id="_neo4j_community_drivers" class="sect2 columns medium-12" style='padding-left: 0;' >
+<h3>Neo4j Community Drivers</h3>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+The drivers below have been thankfully contributed by the Neo4j community.
+Many of these are fully featured and well maintained.
+But we don&#8217;t take any reponsibility for their fitness for use with the most recent Versions of Neo4j.
+</td>
+</tr>
+</table>
+</div>
 </div>
 <div  id="neo4j-jdbc" class="sect2 columns medium-12" style='padding-left: 0;' >
 <h3>Using Neo4j Server with JDBC</h3>
